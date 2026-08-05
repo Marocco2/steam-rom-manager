@@ -127,9 +127,9 @@ export class FileParser {
 
         // exceptions are always last; they overwrite all other changes
         .then(this.userExceptionsPromise.bind(this))
-        
-        
-        
+
+
+
         .then(this.imagesPromise.bind(this))
         .then(this.titleLockPromise.bind(this))
         .then(this.backedUpLocalImagesPromise.bind(this))
@@ -472,7 +472,7 @@ export class FileParser {
                   "postCustomVariables",
                   titlesFromVariables[i]
                 )
-              } 
+              }
               else if(config.titleFromVariable.skipFileIfVariableWasNotFound){
                 variableFailures[i] = true;
               }
@@ -603,12 +603,12 @@ export class FileParser {
 
           // In setting the modified title any of the previous titles can be used (extracted, postshortcut, postcv, postfuzzy)
           let variableData = this.makeVariableData(
-            config, 
-            settings, 
-            newFile, 
+            config,
+            settings,
+            newFile,
             titleModifierHandler.getTitleModifiers(i)
           );
-          
+
           let modifiedTitle = ""
           if (config.titleModifier) {
             modifiedTitle = vParser.setInput(config.titleModifier).parse()
@@ -619,13 +619,13 @@ export class FileParser {
                 ).trim();
               })
             : "";
-          }            
+          }
           titleModifierHandler.advanceModifier(
             i,
             "postTitleModifier",
             modifiedTitle
           )
-          // explicitly make postTitleModifier title available as a variable 
+          // explicitly make postTitleModifier title available as a variable
           // so the rest of the modifiers can use it.
           variableData.titles = titleModifierHandler.getTitleModifiers(i)
 
@@ -1115,7 +1115,7 @@ export class FileParser {
       let match = null;
       for (let j = 0; j < groups.length; j++) {
         const groupData = this.customVariableData[groups[j]];
-        
+
         // Compute the matching key
         if (useCaseInsensitive) {
           for (const key in groupData) {
@@ -1164,7 +1164,7 @@ export class FileParser {
       }
     }
     return sortAsTitles
-  }    
+  }
 
   private filterUserAccounts(
     accountData: userAccountData[],
