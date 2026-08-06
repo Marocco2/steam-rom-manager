@@ -7,35 +7,15 @@ export interface StringMap {
   [key: string]: any;
 }
 
-/* Title waterfall is
- - 1. extractedTitle (the title extracted by the parser; no modifications)
- - 2. customVariablesTitle (the title after applying any custom variables to the title)
- - 3. shortcutsPassthroughTitle (the title being read from the shortcut if what is being parsed is a .lnk or .desktop)
- - 4. fuzzyTitle (the title produced by fuzzy matching if enabled)
- - 5. finalTitle (the final title that will be used in steam)
-
- - 2b. sortAsTitle (the separate sort-by title that will be used by steam; only exists if set by a custom variable)
-*/
-
-export const TITLE_MODIFIER_KEYS = [
-  "extracted", 
-  "postShortcutPassthrough",
-  "postCustomVariables",
-  "postFuzzy",
-  "postTitleModifier",
-  "final"
-] as const; // ordered title waterfall
-export type TitleModifierKey = typeof TITLE_MODIFIER_KEYS[number];
-export type TitleModifiers = Record<TitleModifierKey, string | null>;
-
-
-export interface ParsedUserConfigurationFile {
+export interface ParsedUserConfigurationFile extends StringMap {
   executableLocation: string;
   modifiedExecutableLocation: string;
   startInDirectory: string;
   filePath: string;
-  titles: TitleModifiers
-  sortAsTitle: string; // not actually part of the title waterfall
+  extractedTitle: string;
+  fuzzyTitle: string;
+  finalTitle: string;
+  sortAsTitle: string;
   argumentString: string;
   appendArgsToExecutable: boolean;
   onlineImageQueries: string[];
@@ -102,8 +82,8 @@ export interface ParsedSuccess {
   fileLaunchOptions?: string; // Used by platform parsers executable mode
   startInDirectory?: string; //Used by manual parsers and parsers whose apps start in a different directory than the executable,
   appendArgsToExecutable?: boolean; //Used by manual parsers
+  sortAsTitle?: string;
 }
-
 export interface ParsedData {
   executableLocation?: string; // Used by platform parsers in launcher mode
   success: ParsedSuccess[];
@@ -116,10 +96,13 @@ export interface ParserVariableData {
   startInDirectory: string;
   steamDirectory: string;
   romDirectory: string;
-  titles: TitleModifiers,
+  extractedTitle: string;
+  fuzzyTitle: string;
+  finalTitle: string;
   filePath: string;
   steamDirectoryGlobal: string;
   romsDirectoryGlobal: string;
+  userAccountsGlobal: string;
   retroarchPath: string;
   raCoresDirectory: string;
   localImagesDirectory: string;
@@ -137,8 +120,6 @@ const extensionVariables = StringLiteralArray(["EXEEXT", "FILEEXT"]);
 const pathVariables = StringLiteralArray(["EXEPATH", "FILEPATH"]);
 const parserVariables = StringLiteralArray([
   "TITLE",
-  "SHORTCUTTITLE",
-  "CUSTOMVARIABLETITLE",
   "FUZZYTITLE",
   "FINALTITLE",
   "PARSERTITLE",
