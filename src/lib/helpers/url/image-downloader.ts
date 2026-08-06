@@ -31,23 +31,23 @@ export class ImageDownloader {
           ? decodeFile(overlayPath)
           : overlayPath;
         const overlayBuffer = await fs.readFile(overlayFilePath);
-        const bufferMetadata = await sharp(buffer, { pages: -1 }).metadata();
+        const bufferMetadata = await sharp(buffer, { pages: -1, limitInputPixels: false }).metadata();
         const overlayBufferResized = await sharp(overlayBuffer)
-          .resize(bufferMetadata.width, bufferMetadata.height, {
+          .resize(bufferMetadata.width, bufferMetadata.pageHeight ? bufferMetadata.pageHeight : bufferMetadata.height, {
             fit: "cover", position: "left top",
           })
           .toBuffer();
 
         const hasAnimation = bufferMetadata.pages && bufferMetadata.pages > 1;
         const image = hasAnimation
-          ? sharp(buffer, { pages: -1 })
+          ? sharp(buffer, { animated: true, limitInputPixels: false })
           : sharp(buffer);
         const composed = image.composite([
-          { input: overlayBufferResized, blend: "over", gravity: "northeast" },
+          { input: overlayBufferResized, blend: "over", gravity: "northeast", limitInputPixels: false, tile: hasAnimation, animated: hasAnimation },
         ]);
 
         if (hasAnimation && bufferMetadata.format === "webp") {
-          buffer = await composed.webp().toBuffer();
+          buffer = await composed.withMetadata().toBuffer();
         // } else if (hasAnimation && bufferMetadata.format === "gif") {
         //   buffer = await composed.gif().toBuffer();
         } else {
