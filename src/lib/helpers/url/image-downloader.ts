@@ -31,15 +31,28 @@ export class ImageDownloader {
           ? decodeFile(overlayPath)
           : overlayPath;
         const overlayBuffer = await fs.readFile(overlayFilePath);
-        const bufferMetadata = await sharp(buffer).metadata();
+        const bufferMetadata = await sharp(buffer, { pages: -1 }).metadata();
         const overlayBufferResized = await sharp(overlayBuffer)
           .resize(bufferMetadata.width, bufferMetadata.height, {
             fit: "cover", position: "left top",
           })
           .toBuffer();
-        buffer = await sharp(buffer)
-          .composite([{ input: overlayBufferResized, blend: "over", gravity: "northeast" }])
-          .toBuffer();
+
+        const hasAnimation = bufferMetadata.pages && bufferMetadata.pages > 1;
+        const image = hasAnimation
+          ? sharp(buffer, { pages: -1 })
+          : sharp(buffer);
+        const composed = image.composite([
+          { input: overlayBufferResized, blend: "over", gravity: "northeast" },
+        ]);
+
+        if (hasAnimation && bufferMetadata.format === "webp") {
+          buffer = await composed.webp().toBuffer();
+        // } else if (hasAnimation && bufferMetadata.format === "gif") {
+        //   buffer = await composed.gif().toBuffer();
+        } else {
+          buffer = await composed.toBuffer();
+        }
       }
       await fs.outputFile(filePath, buffer);
       if (secondaryPath) {
